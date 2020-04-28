@@ -100,14 +100,47 @@ def repo_dir(repo, *path, mkdir=False):
     else:
         return None
 
+# to create a new git repo, we create the following paths
+# .git is the git repository
+#   .git/objects: the object store
+#   .git/refs: the reference store, it contains 2 subdirs heads and tags
+#   .git/HEAD: a reference to the current head
+#   .git/config: repository's configuration file
+#   .git/description: repository's description file
+
+def repo_create(path):
+    """Create a new repository at path."""
+    
+    repo = GitRepository(path, True)
+    
+    if os.path.exists(repo.worktree):
+        if not os.path.isdir(repo.worktree):
+            raise Exception("%s is not a directory!" % path)
+        if os.listdir(repo.worktree):
+            raise Exception("%s is not empty!" % path)
+    else:
+        os.makedirs(repo.worktree)
+
+    assert(repo_dir(repo, "branches", mkdir=True) 
+    assert(repo_dir(repo, "objects", mkdir=True) 
+    assert(repo_dir(repo, "refs", "tags", mkdir=True) 
+    assert(repo_dir(repo, "refs", "heads", mkdir=True) 
+
+    # .git/description
+    with open(repo_file(repo, "description"), "w") as f:
+        f.write("Unnamed repository: edit this file 'description' to name the repository.\n")
+
+    # .git/HEAD
+    with open(repo_file(repo, "HEAD"), "w") as f:
+        f.write("ref: refs/heads/master\n")
+
+    with open(repo_file(repo, "config"), "w") as f:
+        config = repo_default_config()
+        config.write(f)
 
 
-
-
-
-
-
-
+    return repo
+    
 
 
 
